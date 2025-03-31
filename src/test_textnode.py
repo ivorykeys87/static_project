@@ -1,37 +1,26 @@
 import unittest
-
 from textnode import TextNode, TextType
+from main import split_nodes_delimiter  # replace with your actual module name
 
-def test_text_type_text():
-    node = TextNode("Example text", TextType.TEXT)
-    html_node = text_node_to_html_node(node)
-    assert html_node.tag is None
-    assert html_node.value == "Example text"
-    assert html_node.props is None
-
-def test_text_type_bold():
-    node = TextNode("Bold text", TextType.BOLD)
-    html_node = text_node_to_html_node(node)
-    assert html_node.tag == "b"
-    assert html_node.value == "Bold text"
-    assert html_node.props is None
-
-def test_text_type_link():
-    node = TextNode("Link text", TextType.LINK, url="http://example.com")
-    html_node = text_node_to_html_node(node)
-    assert html_node.tag == "a"
-    assert html_node.value == "Link text"
-    assert html_node.props == {"href": "http://example.com"}
-
-def test_link_with_missing_url():
-    node = TextNode("Link with no URL", TextType.LINK)
-    html_node = text_node_to_html_node(node)
-    assert html_node.tag == "a"
-    assert html_node.value == "Link with no URL"
-    assert html_node.props is None
-
-def test_image_with_missing_alt():
-    node = TextNode("Unimportant")
+class TestSplitNodesDelimiter(unittest.TestCase):
+    def test_no_delimiter(self):
+        node = TextNode("This is plain text", TextType.TEXT)
+        result = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].text, "This is plain text")
+        self.assertEqual(result[0].text_type, TextType.TEXT)
+        
+    def test_one_delimiter_pair(self):
+        node = TextNode("This is text with `code` in it", TextType.TEXT)
+        result = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0].text, "This is text with ")
+        self.assertEqual(result[0].text_type, TextType.TEXT)
+        self.assertEqual(result[1].text, "code")
+        self.assertEqual(result[1].text_type, TextType.CODE)
+        self.assertEqual(result[2].text, " in it")
+        self.assertEqual(result[2].text_type, TextType.TEXT)
+        
 
 
 if __name__ == "__main__":
