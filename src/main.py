@@ -1,5 +1,6 @@
 from textnode import *
 import unittest
+import re
 
 def text_node_to_html_node(text_node):
     if not isinstance(text_node.text_type, TextType):
@@ -45,30 +46,14 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         return split_nodes_delimiter(new_nodes, delimiter, text_type)
     return new_nodes
 
-        
+def extract_markdown_images(text):
+    return list(re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)",text))
 
+def extract_markdown_links(text):
+    return list(re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text))
 
 def main():
-
-    class TestSplitNodesDelimiter(unittest.TestCase):
-        def test_no_delimiter(self):
-            node = TextNode("This is plain text", TextType.TEXT)
-            result = split_nodes_delimiter([node], "`", TextType.CODE)
-            self.assertEqual(len(result), 1)
-            self.assertEqual(result[0].text, "This is plain text")
-            self.assertEqual(result[0].text_type, TextType.TEXT)
-        
-        def test_one_delimiter_pair(self):
-            node = TextNode("This is text with `code` in it", TextType.TEXT)
-            result = split_nodes_delimiter([node], "`", TextType.CODE)
-            self.assertEqual(len(result), 3)
-            self.assertEqual(result[0].text, "This is text with ")
-            self.assertEqual(result[0].text_type, TextType.TEXT)
-            self.assertEqual(result[1].text, "code")
-            self.assertEqual(result[1].text_type, TextType.CODE)
-            self.assertEqual(result[2].text, " in it")
-            self.assertEqual(result[2].text_type, TextType.TEXT)
-
+    pass
 
 
 main()

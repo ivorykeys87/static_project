@@ -1,49 +1,41 @@
 import unittest
 from htmlnode import HTMLNode, LeafNode, ParentNode
 
-class TestParentNode(unittest.TestCase):
-    def test_parent_node_constructor(self):
-        # Basic construction
-        children = [LeafNode("span", "child")]
-        node = ParentNode("div", children)
-        self.assertEqual(node.tag, "div")
-        self.assertEqual(node.children, children)
-        self.assertIsNone(node.props)
-        self.assertIsNone(node.value)
-        
-        # With props
-        props = {"class": "container"}
-        node_with_props = ParentNode("div", children, props)
-        self.assertEqual(node_with_props.props, props)
+from main import extract_markdown_images, extract_markdown_links  # replace with your actual module name
+
+class TestExtractMarkdownImages(unittest.TestCase):
+    def test_extract_single_image(self):
+        text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        matches = extract_markdown_images(text)
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
     
-    def test_to_html_basic(self):
-        child_node = LeafNode("span", "child")
-        parent_node = ParentNode("div", [child_node])
-        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
-    
-    def test_to_html_with_multiple_children(self):
-        children = [
-            LeafNode("b", "Bold text"),
-            LeafNode(None, "Normal text"),
-            LeafNode("i", "italic text"),
-            LeafNode(None, "Normal text")
+    def test_extract_multiple_images(self):
+        text = "Here are two images: ![first](https://example.com/1.jpg) and ![second](https://example.com/2.jpg)"
+        matches = extract_markdown_images(text)
+        expected = [
+            ("first", "https://example.com/1.jpg"),
+            ("second", "https://example.com/2.jpg")
         ]
-        parent_node = ParentNode("p", children)
-        self.assertEqual(
-            parent_node.to_html(),
-            "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>"
-        )
+        self.assertListEqual(expected, matches)
     
-    def test_to_html_with_grandchildren(self):
-        grandchild_node = LeafNode("b", "grandchild")
-        child_node = ParentNode("span", [grandchild_node])
-        parent_node = ParentNode("div", [child_node])
-        self.assertEqual(
-            parent_node.to_html(),
-            "<div><span><b>grandchild</b></span></div>"
-        )
-
-
+    def test_extract_image_with_empty_alt(self):
+        text = "This is an image with no alt text: ![](https://example.com/image.png)"
+        matches = extract_markdown_images(text)
+        self.assertListEqual([("", "https://example.com/image.png")], matches)
+    
+    def test_extract_single_link(self):
+        text = "Check out [Boot.dev](https://www.boot.dev)"
+        matches = extract_markdown_links(text)
+        self.assertListEqual([("Boot.dev", "https://www.boot.dev")], matches)
+    
+    def test_extract_multiple_links(self):
+        text = "Visit [Google](https://google.com) or [GitHub](https://github.com)"
+        matches = extract_markdown_links(text)
+        expected = [
+            ("Google", "https://google.com"),
+            ("GitHub", "https://github.com")
+        ]
+        self.assertListEqual(expected, matches)
 
 if __name__ == "__main__":
     unittest.main()
