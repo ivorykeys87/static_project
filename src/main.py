@@ -52,6 +52,85 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     return list(re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text))
 
+def split_nodes_image(old_nodes):
+    result = []
+    for old_node in old_nodes:
+        # If no images or wrong type, just add the original node
+        if old_node.text_type != TextType.TEXT or not extract_markdown_images(old_node.text):
+            result.append(old_node)
+            continue
+            
+        # Start with the current text
+        curr_text = old_node.text
+        
+        # Process all images in this node
+        while True:
+            # Find an image in the current text
+            images = extract_markdown_images(curr_text)
+            if not images:
+                # No more images, add remaining text if any
+                if curr_text:
+                    result.append(TextNode(curr_text, TextType.TEXT))
+                break
+                
+            # Process the first image
+            alt, url = images[0]
+            image_markdown = f"![{alt}]({url})"
+            
+            # Split into "before image" and "after image"
+            parts = curr_text.split(image_markdown, 1)
+            
+            # Add "before image" text node if not empty
+            if parts[0]:
+                result.append(TextNode(parts[0], TextType.TEXT))
+                
+            # Add the image node
+            result.append(TextNode(alt, TextType.IMAGE, url))
+            
+            # Update current text to be the "after image" part
+            curr_text = parts[1] if len(parts) > 1 else ""
+    return result
+
+def split_nodes_link(old_nodes):
+    result = []
+    for old_node in old_nodes:
+        # If no images or wrong type, just add the original node
+        if old_node.text_type != TextType.TEXT or not extract_markdown_links(old_node.text):
+            result.append(old_node)
+            continue
+            
+        # Start with the current text
+        curr_text = old_node.text
+        
+        # Process all images in this node
+        while True:
+            # Find an image in the current text
+            links = extract_markdown_links(curr_text)
+            if not links:
+                # No more images, add remaining text if any
+                if curr_text:
+                    result.append(TextNode(curr_text, TextType.TEXT))
+                break
+                
+            # Process the first image
+            alt, url = links[0]
+            link_markdown = f"[{alt}]({url})"
+            
+            # Split into "before image" and "after image"
+            parts = curr_text.split(link_markdown, 1)
+            
+            # Add "before image" text node if not empty
+            if parts[0]:
+                result.append(TextNode(parts[0], TextType.TEXT))
+                
+            # Add the image node
+            result.append(TextNode(alt, TextType.LINK, url))
+            
+            # Update current text to be the "after image" part
+            curr_text = parts[1] if len(parts) > 1 else ""
+    return result
+
+
 def main():
     pass
 
