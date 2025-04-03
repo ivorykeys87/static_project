@@ -130,6 +130,19 @@ def split_nodes_link(old_nodes):
             curr_text = parts[1] if len(parts) > 1 else ""
     return result
 
+def text_to_textnodes(text):
+    if not text:
+        return []
+    else:
+        nodes = [TextNode(text, TextType.TEXT)]  # Start as a list of one TextNode
+        nodes = split_nodes_image(nodes)
+        nodes = split_nodes_link(nodes)
+        nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+        nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+        nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    return nodes
+
+
 
 def main():
     pass
