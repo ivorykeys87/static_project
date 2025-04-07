@@ -1,66 +1,43 @@
 import unittest
 from textnode import TextNode, TextType
-from text_func import markdown_to_blocks  # replace with your actual module name
+from blocknode import block_to_block_type, BlockType  # replace with your actual module name
 
-class TestMarkdownToBlocks(unittest.TestCase):
-    def test_markdown_to_blocks(self):
-        md = """
-This is **bolded** paragraph
-
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-
-- This is a list
-- with items
-"""
-        blocks = markdown_to_blocks(md)
-        self.assertEqual(
-            blocks,
-            [
-                "This is **bolded** paragraph",
-                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-                "- This is a list\n- with items",
-            ],
-        )
+class TestBlockToBlockType(unittest.TestCase):
     
-    def test_basic_markdown_blocks(self):
-        md = """# Heading
+    def test_heading(self):
+        self.assertEqual(block_to_block_type("# Heading 1"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("## Heading 2"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("###### Heading 6"), BlockType.HEADING)
+        # Not a heading - no space after #
+        self.assertEqual(block_to_block_type("#NoSpace"), BlockType.PARAGRAPH)
+        # Not a heading - too many #
+        self.assertEqual(block_to_block_type("####### Too many"), BlockType.PARAGRAPH)
 
-Paragraph with **bold** text.
+    def test_code(self):
+        self.assertEqual(block_to_block_type("```\ncode block\n```"), BlockType.CODE)
+        self.assertEqual(block_to_block_type("```\n```"), BlockType.CODE)
+        # Not a code block - only starts with backticks
+        self.assertEqual(block_to_block_type("```\nno ending"), BlockType.PARAGRAPH)
+        # Not a code block - only ends with backticks
+        self.assertEqual(block_to_block_type("no starting\n```"), BlockType.PARAGRAPH)
 
-- List item 1
-- List item 2"""
-        
-        blocks = markdown_to_blocks(md)
-        self.assertEqual(
-            blocks,
-            [
-                "# Heading",
-                "Paragraph with **bold** text.",
-                "- List item 1\n- List item 2"
-            ]
-        )
+    def test_unordered_list(self):
+        self.assertEqual(block_to_block_type("- item 1"), BlockType.UNORDERED_LIST)
+        self.assertEqual(block_to_block_type("- item 1\n- item 2\n- item 3"), BlockType.UNORDERED_LIST)
+        # Not an unordered list - missing space after dash
+        self.assertEqual(block_to_block_type("-no space"), BlockType.PARAGRAPH)
+        # Not an unordered list - one line doesn't have dash
+        self.assertEqual(block_to_block_type("- item 1\nno dash\n- item 3"), BlockType.PARAGRAPH)
 
-    def test_markdown_with_excessive_newlines(self):
-        md = """First paragraph
-
-
-Second paragraph
-
-
-
-Third paragraph"""
-        
-        blocks = markdown_to_blocks(md)
-        self.assertEqual(
-            blocks,
-            [
-                "First paragraph",
-                "Second paragraph",
-                "Third paragraph"
-            ]
-        )
-  
+    def test_ordered_list(self):
+        self.assertEqual(block_to_block_type("1. item 1"), BlockType.ORDERED_LIST)
+        self.assertEqual(block_to_block_type("1. item 1\n2. item 2\n3. item 3"), BlockType.ORDERED_LIST)
+        # Not an ordered list - numbers not sequential
+        self.assertEqual(block_to_block_type("1. item 1\n3. item 3"), BlockType.PARAGRAPH)
+        # Not an ordered list - doesn't start with 1
+        self.assertEqual(block_to_block_type("2. item 2\n3. item 3"), BlockType.PARAGRAPH)
+        # Not an ordered list - missing space after number
+        self.assertEqual(block_to_block_type("1.no space"), BlockType.PARAGRAPH)
 
 
 if __name__ == "__main__":
