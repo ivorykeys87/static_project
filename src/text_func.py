@@ -87,7 +87,7 @@ def split_nodes_image(old_nodes):
                 result.append(TextNode(parts[0], TextType.TEXT))
                 
             # Add the image node
-            result.append(TextNode(alt, TextType.IMAGE, url))
+            result.append(TextNode("", TextType.IMAGE, url, alt))
             
             # Update current text to be the "after image" part
             curr_text = parts[1] if len(parts) > 1 else ""
