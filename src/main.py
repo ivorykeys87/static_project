@@ -19,7 +19,7 @@ def copy_static_to_public(source_dir=None, dest_dir=None):
         if source_dir is None:
             source_dir = os.path.join(project_dir, "static")
         if dest_dir is None:
-            dest_dir = os.path.join(project_dir, "public")
+            dest_dir = os.path.join(project_dir, "docs")
             
         # Check if destination exists and remove it (only for the initial call)
         if os.path.exists(dest_dir):
